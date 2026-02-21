@@ -1,0 +1,95 @@
+@import "tailwindcss";
+
+/* --- 1. Theme Variables (New Project Colors) --- */
+@theme {
+  --color-brand-primary: #10b981;    /* Emerald */
+  --color-brand-secondary: #f59e0b;  /* Amber/Gold */
+  --color-brand-dark: #020617;       /* Deep Slate */
+  
+  --animate-border-spin: border-rotate 4s linear infinite;
+}
+
+/* --- 2. Base Setup --- */
+body {
+  background-color: var(--color-brand-dark);
+  color: white;
+  font-family: 'Inter', sans-serif;
+  /* Halka sa background mesh taake bilkul flat na lage */
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.15) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(245, 158, 11, 0.10) 0px, transparent 50%);
+  min-height: 100vh;
+}
+
+/* --- 3. Components (System from Old File + Neon Logic) --- */
+@layer components {
+
+  /* Yeh wo wrapper hai jo Neon Border banaye ga */
+  .neon-card-wrapper {
+    @apply relative p-[2px] overflow-hidden rounded-2xl;
+    /* Is se peechay background ghoomega */
+    z-index: 0; 
+  }
+
+  /* Yeh ghoomne wala gradient hai (Emerald aur Gold ka mix) */
+  .neon-card-wrapper::before {
+    content: "";
+    @apply absolute top-1/2 left-1/2 h-[200%] w-[200%];
+    background: conic-gradient(
+      from 0deg, 
+      transparent 0deg, 
+      var(--color-brand-primary) 90deg, 
+      transparent 180deg, 
+      var(--color-brand-secondary) 270deg, 
+      transparent 360deg
+    );
+    /* Center set karke ghoomo */
+    transform: translate(-50%, -50%);
+    animation: border-rotate 4s linear infinite;
+  }
+
+  /* Yeh main card hai (Old Project wala logic) */
+  .shiny-card {
+    @apply relative h-full w-full rounded-2xl bg-slate-950/90 backdrop-blur-xl border border-white/5 p-6;
+    /* Iske andar content safe rahega */
+    z-index: 1; 
+  }
+
+  /* Card ke upar jo light guzarti hai (Old Project style) */
+  .shiny-card::after {
+    content: "";
+    @apply absolute -inset-full top-0 block h-full w-1/2 -skew-x-12;
+    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.05), transparent);
+    animation: shine 6s infinite;
+    pointer-events: none;
+  }
+
+  /* Button Logic (New Colors) */
+  .btn-gold {
+    @apply relative px-6 py-3 rounded-full font-bold text-slate-950 uppercase tracking-wide overflow-hidden;
+    background: linear-gradient(135deg, var(--color-brand-secondary) 0%, #fbbf24 100%);
+    transition: all 0.3s ease;
+  }
+  
+  .btn-gold:hover {
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.6);
+    transform: scale(1.02);
+  }
+}
+
+/* --- 4. Keyframes (Jo tumne mange thay) --- */
+@keyframes border-rotate {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@keyframes shine {
+  0% { left: -100%; }
+  20% { left: 200%; } /* Thora lamba distance taake animation smooth lage */
+  100% { left: 200%; }
+}
+
+@layer utilities {
+  .perspective-1000 { perspective: 1000px; }
+  .backface-hidden { backface-visibility: hidden; }
+}
