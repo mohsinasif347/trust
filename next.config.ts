@@ -1,27 +1,81 @@
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
-  reactStrictMode: true,
-  
-  // 1. Turbopack/Webpack Force band karein
-  // Agar package.json se --webpack hata diya hai toh yahan turbopack: {} ki zaroorat nahi
-  
-  // 2. Images Optimization (Supabase ke liye perfect hai)
-  images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: '**.supabase.co',
-        pathname: '/storage/v1/object/public/**',
-      },
-    ],
+import withPWAInit from "@ducanh2912/next-pwa";
+
+
+
+const withPWA = withPWAInit({
+
+  dest: "public",
+
+  cacheOnFrontEndNav: true,
+
+  aggressiveFrontEndNavCaching: true,
+
+  reloadOnOnline: true,
+
+  disable: process.env.NODE_ENV === "development",
+
+  workboxOptions: {
+
+    disableDevLogs: true,
+
   },
 
-  // 3. Edge Runtime Compatibility
-  // Ye ensure karega ke Next.js Node.js ke puranay variables inject na karay
+});
+
+
+
+const nextConfig: NextConfig = {
+
+  reactStrictMode: true,
+
+ 
+
+  // 1. Turbopack Error Fix:
+
+  // Next.js 16 ko batana ke hum custom configuration (PWA) use kar rahe hain
+
+  turbopack: {},
+
+
+
+  // 2. Images Optimization:
+
+  images: {
+
+    remotePatterns: [
+
+      {
+
+        protocol: 'https',
+
+        hostname: '**.supabase.co',
+
+        port: '',
+
+        pathname: '/storage/v1/object/public/**',
+
+      },
+
+    ],
+
+  },
+
+
+
+  // 3. Experimental (Next.js 16 specific):
+
+  // Agar aap middleware.ts ko proxy.ts mein convert karte hain
+
   experimental: {
-    // Agar koi specific feature chahiye toh yahan rakhein
+
+    // any extra experimental features here
+
   }
+
 };
 
-export default nextConfig;
+
+
+export default withPWA(nextConfig);
