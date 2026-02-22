@@ -1,30 +1,32 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
-import { redirect } from "next/navigation";
 
 export async function signUpUser(formData: FormData) {
   const supabase = await createClient();
 
-  // 1. Data extraction from form
-  const phone = formData.get("phone") as string; // User ka asli phone number
+  // 1. Data extraction (Ab real email bhi nikalenge)
+  const email = formData.get("email") as string; // Real email from form
+  const phone = formData.get("phone") as string; 
   const password = formData.get("password") as string;
   const fullName = formData.get("fullName") as string;
   const referralId = formData.get("referralId") as string;
 
-  // 2. Dummy Email Generation (Phone-to-Email logic)
-  // Hum phone number ke aage domain laga kar email banayen ge taake login process chale
-  const dummyEmail = `${phone}@birdvest.com`;
+  // 2. Validation (Basic check)
+  if (!email || !password || !fullName) {
+    return { error: "Zaroori maloomat missing hain!" };
+  }
 
-  // 3. Supabase Auth Sign Up with Metadata
+  // 3. Supabase Auth Sign Up (Real Email ke sath)
   const { data, error } = await supabase.auth.signUp({
-    email: dummyEmail,
+    email: email, // Dummy khatam, ab asli email
     password,
     options: {
       data: {
-        full_name: fullName,      // Profile trigger ke liye
-        phone_number: phone,      // Table mein extract karne ke liye
-        referred_by: referralId,  // Referral track karne ke liye
+        full_name: fullName,
+        phone_number: phone,
+        referred_by: referralId || null,
+        role: 'user', // Default role
       },
     },
   });
@@ -34,8 +36,13 @@ export async function signUpUser(formData: FormData) {
     return { error: error.message };
   }
 
-  // 4. Success!
-  // Note: Agar email verification on hai Supabase mein, to user foran login nahi hoga.
-  // Isay Supabase Dashboard > Auth > Providers > Email mein ja kar "Confirm email" off kar dena.
-  redirect("/dashboard");
+  // 4. Important Change: 
+  // Agar email confirmation ON hai (jo ke honi chahiye), 
+  // toh hum redirect nahi kar sakte kyunke user abhi login nahi hua.
+  // Hum client ko success return karenge taake wo popup dikhaye.
+  
+  return { 
+    success: true, 
+    message: "Confirmation link aap ke email par bhej diya gaya hai." 
+  };
 }
